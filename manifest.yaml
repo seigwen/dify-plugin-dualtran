@@ -1,0 +1,35 @@
+version: 0.1.0
+type: plugin
+author: seigwen
+name: dualtran
+label:
+  en_US: DualTran
+  ja_JP: DualTran
+  zh_Hans: DualTran
+  pt_BR: DualTran
+description:
+  en_US: Translate text with Google or your own AI model (BYOK, 20+ providers)
+  ja_JP: Translate text with Google or your own AI model (BYOK, 20+ providers)
+  zh_Hans: 用 Google 或你自己的 AI 模型翻译文本（BYOK，支持 20+ 供应商）
+  pt_BR: Translate text with Google or your own AI model (BYOK, 20+ providers)
+icon: icon.svg
+icon_dark: icon-dark.svg
+resource:
+  memory: 268435456
+  permission: {}
+plugins:
+  tools:
+    - provider/dualtran.yaml
+meta:
+  version: 0.1.0
+  arch:
+    - amd64
+    - arm64
+  runner:
+    language: python
+    version: "3.12"
+    entrypoint: main
+  minimum_dify_version: null
+created_at: 2026-10-15T02:37:00.744857287Z
+privacy: PRIVACY.md
+verified: false

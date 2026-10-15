@@ -1,0 +1,74 @@
+identity:
+  author: "seigwen"
+  name: "dualtran"
+  label:
+    en_US: "DualTran"
+    zh_Hans: "DualTran"
+    ja_JP: "DualTran"
+    pt_BR: "DualTran"
+  description:
+    en_US: "Translate text with Google or your own AI model (BYOK, 20+ providers)."
+    zh_Hans: "用 Google 或你自己的 AI 模型翻译文本（BYOK，支持 20+ 供应商）。"
+    ja_JP: "Google または自分の AI モデル（BYOK、20+ プロバイダー）でテキストを翻訳します。"
+    pt_BR: "Traduza textos com o Google ou seu próprio modelo de IA (BYOK, mais de 20 provedores)."
+  icon: "icon.svg"
+
+credentials_schema:
+  - name: "provider"
+    type: "select"
+    required: true
+    default: "google_free"
+    label:
+      en_US: "Engine"
+      zh_Hans: "引擎"
+    help:
+      en_US: "google_free needs no key; the other engines use your own API key (BYOK)."
+      zh_Hans: "google_free 无需密钥；其它引擎使用你自己的 API 密钥（BYOK）。"
+    options:
+      - value: "google_free"
+        label:
+          en_US: "Google (free, no key)"
+          zh_Hans: "Google（免费，无需密钥）"
+      - value: "openai_compatible"
+        label:
+          en_US: "AI — OpenAI-compatible (BYOK)"
+          zh_Hans: "AI — OpenAI 兼容接口（BYOK）"
+      - value: "deepl"
+        label:
+          en_US: "DeepL (BYOK)"
+          zh_Hans: "DeepL（BYOK）"
+  - name: "api_key"
+    type: "secret-input"
+    required: false
+    label:
+      en_US: "API Key"
+      zh_Hans: "API 密钥"
+    placeholder:
+      en_US: "Required for AI / DeepL engines"
+      zh_Hans: "AI / DeepL 引擎需要填写"
+  - name: "base_url"
+    type: "text-input"
+    required: false
+    default: ""
+    label:
+      en_US: "Base URL (optional)"
+      zh_Hans: "接口地址（可选）"
+    placeholder:
+      en_US: "https://api.openai.com/v1"
+      zh_Hans: "https://api.openai.com/v1"
+  - name: "model"
+    type: "text-input"
+    required: false
+    default: ""
+    label:
+      en_US: "Model (AI engine)"
+      zh_Hans: "模型（AI 引擎）"
+    placeholder:
+      en_US: "gpt-4o-mini"
+      zh_Hans: "gpt-4o-mini"
+
+tools:
+  - tools/dualtran.yaml
+extra:
+  python:
+    source: provider/dualtran.py
