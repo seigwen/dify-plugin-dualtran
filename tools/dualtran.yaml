@@ -4,10 +4,14 @@ identity:
   label:
     en_US: "DualTran Translate"
     zh_Hans: "DualTran 翻译"
+    ja_JP: "DualTran Translate"
+    pt_BR: "DualTran Translate"
 description:
   human:
     en_US: "Translate text with Google or your own AI model (BYOK)."
     zh_Hans: "用 Google 或你自己的 AI 模型翻译文本（BYOK）。"
+    ja_JP: "Google またはご自身の AI モデル（BYOK）でテキストを翻訳します。"
+    pt_BR: "Traduza textos com o Google ou com seu próprio modelo de IA (BYOK)."
   llm: "Translate a text into a target language. Engines: Google (free) or the user's configured AI/DeepL provider (BYOK)."
 parameters:
   - name: "text"
@@ -16,9 +20,13 @@ parameters:
     label:
       en_US: "Text"
       zh_Hans: "文本"
+      ja_JP: "テキスト"
+      pt_BR: "Texto"
     human_description:
       en_US: "The text to translate."
       zh_Hans: "需要翻译的文本。"
+      ja_JP: "翻訳するテキスト。"
+      pt_BR: "O texto a ser traduzido."
     llm_description: "The text to translate."
     form: "llm"
   - name: "target_lang"
@@ -27,9 +35,13 @@ parameters:
     label:
       en_US: "Target language"
       zh_Hans: "目标语言"
+      ja_JP: "翻訳先言語"
+      pt_BR: "Idioma de destino"
     human_description:
       en_US: "Language code to translate into, e.g. en, zh-CN, ja."
       zh_Hans: "翻译目标语言代码，例如 en、zh-CN、ja。"
+      ja_JP: "翻訳先の言語コード（例: en, zh-CN, ja）。"
+      pt_BR: "Código do idioma para o qual traduzir, por exemplo, en, zh-CN, ja."
     llm_description: "Target language code (en, zh-CN, ja, …)."
     form: "llm"
   - name: "source_lang"
@@ -38,9 +50,13 @@ parameters:
     label:
       en_US: "Source language"
       zh_Hans: "源语言"
+      ja_JP: "翻訳元言語"
+      pt_BR: "Idioma de origem"
     human_description:
       en_US: "Language the text is written in; auto detects it."
       zh_Hans: "文本的源语言；auto 表示自动检测。"
+      ja_JP: "テキストの言語。自動検出されます。"
+      pt_BR: "Idioma em que o texto está escrito; detecta automaticamente."
     llm_description: "Source language code or auto (detect)."
     form: "llm"
 extra:

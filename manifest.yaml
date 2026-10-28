@@ -14,6 +14,8 @@ description:
   pt_BR: Translate text with Google or your own AI model (BYOK, 20+ providers)
 icon: icon.svg
 icon_dark: icon-dark.svg
+repo: https://github.com/seigwen/dify-plugin-dualtran
+contact: seigwen@foxmail.com
 resource:
   memory: 268435456
   permission: {}
