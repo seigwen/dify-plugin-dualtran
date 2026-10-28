@@ -52,3 +52,11 @@ bash scripts/verify.sh                     # tests + package + artifact assertio
 
 The plugin source is MIT; it calls third-party translation services with the
 user's own credentials. See PRIVACY.md.
+
+## Languages
+
+The engine itself has no interface: strings this package exposes are MCP tool
+names/descriptions and parameter docs, which LLM clients and protocol tooling
+consume in English. Localising them would hurt discoverability, so they stay
+English by policy. Any future user-facing surface must follow the DualTran i18n
+standard (38 catalogues, `locales/<code>/messages.json`).
