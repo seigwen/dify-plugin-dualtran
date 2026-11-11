@@ -69,21 +69,176 @@ credentials_schema:
       zh_Hans: "接口地址（可选）"
       ja_JP: "ベース URL（任意）"
       pt_BR: "URL base (opcional)"
+    help:
+      en_US: "Leave empty to use the provider default. Override it for proxies and self-hosted OpenAI-compatible servers."
+      zh_Hans: "留空则使用供应商默认地址；代理和自建 OpenAI 兼容服务请在此覆盖。"
+      ja_JP: "空欄の場合はプロバイダーの既定値を使用します。プロキシや自前の OpenAI 互換サーバーではここで上書きしてください。"
+      pt_BR: "Deixe vazio para usar o padrão do provedor. Preencha para proxies e servidores compatíveis com OpenAI auto-hospedados."
     placeholder:
       en_US: "https://api.openai.com/v1"
       zh_Hans: "https://api.openai.com/v1"
+      ja_JP: "https://api.openai.com/v1"
+      pt_BR: "https://api.openai.com/v1"
   - name: "model"
-    type: "text-input"
+    type: "select"
     required: false
-    default: ""
+    default: "openai_compatible/gpt-4o"
     label:
       en_US: "Model (AI engine)"
       zh_Hans: "模型（AI 引擎）"
       ja_JP: "モデル（AI エンジン）"
       pt_BR: "Modelo (mecanismo de IA)"
+    help:
+      en_US: "Curated list, sorted by name. Options read provider/model: the prefix picks the engine and the rest is the model id. Pick Custom… to type any name the list does not have. Dify cannot fetch a live catalogue from credentials, so the list is static."
+      zh_Hans: "精选列表，按名称排序。选项格式为 供应商/模型：前缀决定引擎，其余为模型 ID。列表中没有的名称请选择“自定义…”。Dify 凭据无法获取在线模型目录，因此列表是静态的。"
+      ja_JP: "名前順の厳選リストです。選択肢は provider/model 形式で、前半がエンジン、後半がモデル ID です。一覧にない名前は「カスタム…」を選んで入力してください。Dify の認証情報からオンラインのモデル一覧は取得できないため、このリストは静的です。"
+      pt_BR: "Lista curada, em ordem alfabética. As opções usam provedor/modelo: o prefixo escolhe o mecanismo e o restante é o ID do modelo. Escolha Personalizado… para digitar um nome fora da lista. As credenciais do Dify não podem buscar um catálogo online, então a lista é estática."
     placeholder:
       en_US: "gpt-4o-mini"
       zh_Hans: "gpt-4o-mini"
+      ja_JP: "gpt-4o-mini"
+      pt_BR: "gpt-4o-mini"
+    options:
+      - value: "openai_compatible/deepseek-v4-flash"
+        label:
+          en_US: "DeepSeek V4 Flash — DeepSeek"
+          zh_Hans: "DeepSeek V4 Flash — DeepSeek"
+          ja_JP: "DeepSeek V4 Flash — DeepSeek"
+          pt_BR: "DeepSeek V4 Flash — DeepSeek"
+
+      - value: "openai_compatible/deepseek-v4-pro"
+        label:
+          en_US: "DeepSeek V4 Pro — DeepSeek"
+          zh_Hans: "DeepSeek V4 Pro — DeepSeek"
+          ja_JP: "DeepSeek V4 Pro — DeepSeek"
+          pt_BR: "DeepSeek V4 Pro — DeepSeek"
+
+      - value: "openai_compatible/glm-4.7-flash"
+        label:
+          en_US: "GLM-4.7-Flash — Zhipu AI"
+          zh_Hans: "GLM-4.7-Flash — Zhipu AI"
+          ja_JP: "GLM-4.7-Flash — Zhipu AI"
+          pt_BR: "GLM-4.7-Flash — Zhipu AI"
+
+      - value: "openai_compatible/gpt-4o"
+        label:
+          en_US: "GPT-4o — OpenAI"
+          zh_Hans: "GPT-4o — OpenAI"
+          ja_JP: "GPT-4o — OpenAI"
+          pt_BR: "GPT-4o — OpenAI"
+
+      - value: "openai_compatible/gpt-5.4-mini"
+        label:
+          en_US: "GPT-5.4 mini — OpenAI"
+          zh_Hans: "GPT-5.4 mini — OpenAI"
+          ja_JP: "GPT-5.4 mini — OpenAI"
+          pt_BR: "GPT-5.4 mini — OpenAI"
+
+      - value: "openai_compatible/gpt-5.6"
+        label:
+          en_US: "GPT-5.6 — OpenAI"
+          zh_Hans: "GPT-5.6 — OpenAI"
+          ja_JP: "GPT-5.6 — OpenAI"
+          pt_BR: "GPT-5.6 — OpenAI"
+
+      - value: "openai_compatible/kimi-k3"
+        label:
+          en_US: "Kimi K3 — Moonshot AI"
+          zh_Hans: "Kimi K3 — Moonshot AI"
+          ja_JP: "Kimi K3 — Moonshot AI"
+          pt_BR: "Kimi K3 — Moonshot AI"
+
+      - value: "openai_compatible/mistral-small-latest"
+        label:
+          en_US: "Mistral Small (latest) — Mistral"
+          zh_Hans: "Mistral Small (latest) — Mistral"
+          ja_JP: "Mistral Small (latest) — Mistral"
+          pt_BR: "Mistral Small (latest) — Mistral"
+
+      - value: "openai_compatible/meta/muse-spark-1.2"
+        label:
+          en_US: "Muse Spark 1.2 — OpenRouter"
+          zh_Hans: "Muse Spark 1.2 — OpenRouter"
+          ja_JP: "Muse Spark 1.2 — OpenRouter"
+          pt_BR: "Muse Spark 1.2 — OpenRouter"
+
+      - value: "openai_compatible/qwen3.7-plus"
+        label:
+          en_US: "Qwen3.7 Plus — Alibaba (China)"
+          zh_Hans: "Qwen3.7 Plus — Alibaba (China)"
+          ja_JP: "Qwen3.7 Plus — Alibaba (China)"
+          pt_BR: "Qwen3.7 Plus — Alibaba (China)"
+      - value: "__custom__"
+        label:
+          en_US: "Custom…"
+          zh_Hans: "自定义…"
+          ja_JP: "カスタム…"
+          pt_BR: "Personalizado…"
+
+  - name: "reasoning"
+    type: "select"
+    required: false
+    default: "lowest"
+    label:
+      en_US: "Reasoning effort"
+      zh_Hans: "推理强度"
+      ja_JP: "推論の強さ"
+      pt_BR: "Esforço de raciocínio"
+    help:
+      en_US: "lowest sends the cheapest level the selected model declares (none, else minimal, else low). default sends no reasoning parameter at all. Higher levels are clamped to what the model supports; translation rarely needs more than low."
+      zh_Hans: "lowest 发送所选模型声明的最省档位（依次为 none、minimal、low）。default 不发送任何推理参数。较高的档位会被限制在模型支持的范围内；翻译通常不需要高于 low。"
+      ja_JP: "lowest は選択したモデルが宣言する最小レベル（none → minimal → low の順）を送信します。default は推論パラメータを送信しません。高いレベルはモデルの対応範囲に丸められます。翻訳では通常 low 以上は不要です。"
+      pt_BR: "lowest envia o nível mais leve declarado pelo modelo escolhido (none, senão minimal, senão low). default não envia nenhum parâmetro de raciocínio. Níveis mais altos são limitados ao que o modelo suporta; tradução raramente precisa de mais que low."
+    options:
+      - value: "lowest"
+        label:
+          en_US: "Lowest the model supports"
+          zh_Hans: "模型支持的最省档位"
+          ja_JP: "モデルが対応する最小"
+          pt_BR: "O menor nível do modelo"
+
+      - value: "default"
+        label:
+          en_US: "Provider default"
+          zh_Hans: "供应商默认"
+          ja_JP: "プロバイダーの既定"
+          pt_BR: "Padrão do provedor"
+
+      - value: "none"
+        label:
+          en_US: "None"
+          zh_Hans: "无"
+          ja_JP: "なし"
+          pt_BR: "Nenhum"
+
+      - value: "minimal"
+        label:
+          en_US: "Minimal"
+          zh_Hans: "极简"
+          ja_JP: "最小"
+          pt_BR: "Mínimo"
+
+      - value: "low"
+        label:
+          en_US: "Low"
+          zh_Hans: "低"
+          ja_JP: "低"
+          pt_BR: "Baixo"
+
+      - value: "medium"
+        label:
+          en_US: "Medium"
+          zh_Hans: "中"
+          ja_JP: "中"
+          pt_BR: "Médio"
+
+      - value: "high"
+        label:
+          en_US: "High"
+          zh_Hans: "高"
+          ja_JP: "高"
+          pt_BR: "Alto"
+
 
 tools:
   - tools/dualtran.yaml

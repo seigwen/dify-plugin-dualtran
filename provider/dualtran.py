@@ -7,10 +7,11 @@ import httpx
 from dify_plugin import ToolProvider
 from dify_plugin.errors.tool import ToolProviderCredentialValidationError
 
+from tools.dualtran import translate_openai_compatible
+
 GOOGLE_ENDPOINT = "https://translate.googleapis.com/translate_a/single"
 DEEPL_FREE_USAGE_ENDPOINT = "https://api-free.deepl.com/v2/usage"
 DEEPL_PAID_USAGE_ENDPOINT = "https://api.deepl.com/v2/usage"
-OPENAI_DEFAULT_BASE_URL = "https://api.openai.com/v1"
 
 
 def _http_client() -> httpx.Client:
@@ -23,6 +24,8 @@ class DualtranProvider(ToolProvider):
         provider = (credentials.get("provider") or "google_free").strip()
         api_key = (credentials.get("api_key") or "").strip()
         base_url = (credentials.get("base_url") or "").strip()
+        model = (credentials.get("model") or "").strip()
+        reasoning = (credentials.get("reasoning") or "lowest").strip()
         try:
             with _http_client() as client:
                 if provider == "google_free":
@@ -35,14 +38,13 @@ class DualtranProvider(ToolProvider):
                 elif provider == "openai_compatible":
                     if not api_key:
                         raise RuntimeError("The OpenAI-compatible engine needs an API key.")
-                    base = (base_url or OPENAI_DEFAULT_BASE_URL).rstrip("/")
-                    response = client.get(
-                        f"{base}/models", headers={"Authorization": f"Bearer {api_key}"}
+                    if not model:
+                        raise RuntimeError("The OpenAI-compatible engine needs a model.")
+                    # A real translation round-trip: proves the key, the endpoint
+                    # and the reasoning level are all accepted by the provider.
+                    translate_openai_compatible(
+                        "hello", "en", api_key, base_url, model, reasoning, client=client
                     )
-                    if response.status_code != 200:
-                        raise RuntimeError(
-                            f"The provider rejected the credentials (HTTP {response.status_code})."
-                        )
                 elif provider == "deepl":
                     if not api_key:
                         raise RuntimeError("The DeepL engine needs an API key.")
