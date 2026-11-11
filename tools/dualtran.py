@@ -35,6 +35,64 @@ AI_SYSTEM_PROMPT = (
     "breaks."
 )
 
+# ── Reasoning effort (R4) ─────────────────────────────────────────────────────
+# The picker offers one superset; each catalogue model declares its own levels.
+# A selection outside a model's table is clamped *downwards* (cheaper first) so a
+# typo can never escalate cost, and `lowest` walks none → minimal → low.
+REASONING_LEVELS = ("lowest", "default", "none", "minimal", "low", "medium", "high")
+LOWEST_ORDER = ("none", "minimal", "low")
+
+# model id → effort values the provider accepts (mirrors facts/models-dev-sample.json)
+REASONING_TABLE: dict[str, tuple[str, ...]] = {
+    "gpt-4o": (),
+    "gpt-5.4-mini": ("none", "low", "medium", "high", "xhigh"),
+    "gpt-5.6": ("none", "low", "medium", "high", "xhigh", "max"),
+    "deepseek-v4-flash": ("low", "high", "max"),
+    "deepseek-v4-pro": ("low", "high", "max"),
+    "kimi-k3": ("low", "high", "max"),
+    "glm-4.7-flash": (),
+    "qwen3.7-plus": (),
+    "mistral-small-latest": (),
+    "meta/muse-spark-1.2": ("minimal", "low", "medium", "high", "xhigh"),
+}
+_DEFAULT_TABLE = LOWEST_ORDER
+
+
+def reasoning_table(model: str) -> tuple[str, ...]:
+    """Levels declared for a model; unknown models get the safest three."""
+    key = model_id(model) if model else ""
+    return REASONING_TABLE.get(key, _DEFAULT_TABLE)
+
+
+def resolve_reasoning(setting: str, model: str = "") -> str:
+    """Map a picker value to the `reasoning_effort` to send ("" = omit).
+
+    - "" / "default"     → omit the field entirely
+    - "lowest"           → none → minimal → low, first the model declares
+    - anything else      → itself, capped down to the nearest declared level
+    - model declares no effort values → omit (it has no reasoning knob)
+    """
+    value = (setting or "").strip().lower()
+    if value in ("", "default"):
+        return ""
+    table = reasoning_table(model)
+    if not table:
+        return ""
+    if value == "lowest":
+        for level in LOWEST_ORDER:
+            if level in table:
+                return level
+        return ""
+    if value not in REASONING_LEVELS:
+        return ""
+    if value in table:
+        return value
+    # Clamp down: the highest declared level strictly below the request.
+    ordered = [level for level in REASONING_LEVELS if level in table]
+    lower = [level for level in ordered if REASONING_LEVELS.index(level) < REASONING_LEVELS.index(value)]
+    return lower[-1] if lower else (ordered[0] if ordered else "")
+
+
 def _default_client(timeout: float) -> httpx.Client:
     """Overridable in tests (monkeypatch to inject a MockTransport client)."""
     return httpx.Client(timeout=timeout)
@@ -104,33 +162,48 @@ def translate_google_free(
     return translated
 
 
+def model_id(option: str) -> str:
+    """Strip the picker's `engine/` prefix: the model select stores `provider/model`."""
+    value = (option or "").strip()
+    if value.startswith("__custom"):
+        return ""
+    engine, sep, rest = value.partition("/")
+    return rest if sep and engine == "openai_compatible" else value
+
+
 def translate_openai_compatible(
     text: str,
     target_lang: str,
     api_key: str,
     base_url: str = "",
     model: str = "",
+    reasoning: str = "",
     client: httpx.Client | None = None,
 ) -> str:
     if not api_key:
         raise RuntimeError("The OpenAI-compatible engine needs an API key (BYOK).")
+    model = model_id(model)
     if not model:
         raise RuntimeError("The OpenAI-compatible engine needs a model name.")
     base = (base_url or OPENAI_DEFAULT_BASE_URL).rstrip("/")
+    body: dict[str, Any] = {
+        "model": model,
+        "temperature": 0.1,
+        "messages": [
+            {"role": "system", "content": AI_SYSTEM_PROMPT.format(target_language=target_lang)},
+            {"role": "user", "content": text},
+        ],
+    }
+    effort = resolve_reasoning(reasoning, model)
+    if effort:
+        body["reasoning_effort"] = effort
     owns_client = client is None
     http = client or _default_client(60.0)
     try:
         response = http.post(
             f"{base}/chat/completions",
             headers={"Authorization": f"Bearer {api_key}"},
-            json={
-                "model": model,
-                "temperature": 0.1,
-                "messages": [
-                    {"role": "system", "content": AI_SYSTEM_PROMPT.format(target_language=target_lang)},
-                    {"role": "user", "content": text},
-                ],
-            },
+            json=body,
         )
     finally:
         if owns_client:
@@ -187,6 +260,7 @@ def translate_text(
     api_key: str = "",
     base_url: str = "",
     model: str = "",
+    reasoning: str = "",
     client: httpx.Client | None = None,
 ) -> str:
     """Validate the parameters, dispatch to the selected engine, return the translation."""
@@ -198,7 +272,9 @@ def translate_text(
     if provider == "google_free":
         return translate_google_free(text, target_lang, source_lang, client=client)
     if provider == "openai_compatible":
-        return translate_openai_compatible(text, target_lang, api_key, base_url, model, client=client)
+        return translate_openai_compatible(
+            text, target_lang, api_key, base_url, model, reasoning, client=client
+        )
     if provider == "deepl":
         return translate_deepl(text, target_lang, api_key, client=client)
     raise ValueError(f"Unknown engine '{provider}'.")
@@ -209,6 +285,8 @@ class DualtranTool(Tool):
         credentials: dict[str, Any] = getattr(self.runtime, "credentials", None) or {}
         provider = credentials.get("provider") or "google_free"
         target_lang = tool_parameters.get("target_lang") or "en"
+        # The per-step parameter wins; the credential is the default for the provider.
+        reasoning = tool_parameters.get("reasoning") or credentials.get("reasoning") or ""
         translated = translate_text(
             provider=provider,
             text=tool_parameters.get("text", ""),
@@ -217,8 +295,14 @@ class DualtranTool(Tool):
             api_key=credentials.get("api_key") or "",
             base_url=credentials.get("base_url") or "",
             model=credentials.get("model") or "",
+            reasoning=reasoning,
         )
         yield self.create_text_message(translated)
         yield self.create_json_message(
-            {"translation": translated, "provider": provider, "target_lang": target_lang}
+            {
+                "translation": translated,
+                "provider": provider,
+                "target_lang": target_lang,
+                "reasoning": resolve_reasoning(reasoning, credentials.get("model") or ""),
+            }
         )

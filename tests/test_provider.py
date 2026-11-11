@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import httpx
 import pytest
 
@@ -45,26 +47,64 @@ def test_openai_compatible_requires_a_key(monkeypatch):
         make_provider()._validate_credentials({"provider": "openai_compatible", "api_key": ""})
 
 
-def test_openai_compatible_checks_models_endpoint(monkeypatch):
+def test_openai_compatible_requires_a_model(monkeypatch):
+    patch_client(monkeypatch, lambda request: httpx.Response(200))
+    with pytest.raises(ToolProviderCredentialValidationError, match="needs a model"):
+        make_provider()._validate_credentials(
+            {"provider": "openai_compatible", "api_key": "k", "model": ""}
+        )
+
+
+def test_openai_compatible_probes_the_chat_endpoint_with_reasoning(monkeypatch):
     seen = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
         seen["url"] = str(request.url)
         seen["auth"] = request.headers.get("authorization")
-        return httpx.Response(200, json={"data": []})
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"choices": [{"message": {"content": "hello"}}]})
 
     patch_client(monkeypatch, handler)
     make_provider()._validate_credentials(
-        {"provider": "openai_compatible", "api_key": "k", "base_url": "https://proxy.example/v1"}
+        {
+            "provider": "openai_compatible",
+            "api_key": "k",
+            "base_url": "https://proxy.example/v1",
+            "model": "openai_compatible/gpt-5.4-mini",
+            "reasoning": "lowest",
+        }
     )
-    assert seen["url"] == "https://proxy.example/v1/models"
+    assert seen["url"] == "https://proxy.example/v1/chat/completions"
     assert seen["auth"] == "Bearer k"
+    assert seen["body"]["model"] == "gpt-5.4-mini"
+    assert seen["body"]["reasoning_effort"] == "none"
+
+
+def test_openai_compatible_omits_reasoning_for_default(monkeypatch):
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"choices": [{"message": {"content": "hello"}}]})
+
+    patch_client(monkeypatch, handler)
+    make_provider()._validate_credentials(
+        {
+            "provider": "openai_compatible",
+            "api_key": "k",
+            "model": "openai_compatible/gpt-5.4-mini",
+            "reasoning": "default",
+        }
+    )
+    assert "reasoning_effort" not in seen["body"]
 
 
 def test_openai_compatible_rejection_raises(monkeypatch):
-    patch_client(monkeypatch, lambda request: httpx.Response(401))
+    patch_client(monkeypatch, lambda request: httpx.Response(401, text="bad key"))
     with pytest.raises(ToolProviderCredentialValidationError, match="HTTP 401"):
-        make_provider()._validate_credentials({"provider": "openai_compatible", "api_key": "bad"})
+        make_provider()._validate_credentials(
+            {"provider": "openai_compatible", "api_key": "bad", "model": "openai_compatible/gpt-4o"}
+        )
 
 
 def test_deepl_uses_the_free_usage_endpoint_for_fx_keys(monkeypatch):

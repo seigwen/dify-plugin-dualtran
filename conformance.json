@@ -1,0 +1,38 @@
+{
+  "spec": "2.0.0",
+  "host": "dify-plugin-dualtran",
+  "payload": "scripts/conformance/payload.py",
+  "payloadCommand": "python3 scripts/conformance/payload.py",
+  "command": "python3 scripts/conformance/run.py",
+  "static": {
+    "files": [
+      "provider/dualtran.yaml",
+      "tools/dualtran.yaml"
+    ],
+    "patterns": [
+      "providerSeparator",
+      "__separator__",
+      "__more__",
+      "More (models.dev)"
+    ]
+  },
+  "platformLimits": [
+    {
+      "rule": "R2",
+      "staticCatalogue": true,
+      "allowBuiltInOnly": true,
+      "reason": "Dify credentials cannot fetch a model catalogue (no network call at config time), so the model picker is a curated static list from facts/models-dev-sample.json plus a Custom… entry. The provider picker is Dify's engine enum (3 built-in engines: google_free, openai_compatible, deepl); there is no models.dev provider merge at runtime."
+    },
+    {
+      "rule": "R5",
+      "locales": 4,
+      "supportedLocales": [
+        "en_US",
+        "zh_Hans",
+        "ja_JP",
+        "pt_BR"
+      ],
+      "reason": "Dify's I18nObject accepts exactly four locales (en_US, zh_Hans, ja_JP, pt_BR); every label, help text and placeholder in this plugin exists in those four and only those."
+    }
+  ]
+}

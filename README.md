@@ -21,11 +21,21 @@ are only needed for the AI / DeepL engines.
 | Parameter | Required | Notes |
 |---|---|---|
 | `text` | yes | The text to translate (supports Dify variables). |
-| `target_lang` | yes | Language code: `en`, `zh-CN`, `ja`, … |
+| `target_lang` | yes | Language picker (44 languages, default `en`). Stores the language code: `en`, `zh-CN`, `ja`, … |
 | `source_lang` | no | Language code or `auto` (detect). |
+| `reasoning` | no | Reasoning-effort override for this step: `lowest` (default), `default`, `none`, `minimal`, `low`, `medium`, `high`. Overrides the plugin credential. |
 
 Outputs: a **text** message (the translation) and a **JSON** message:
-`{ "translation": "...", "provider": "...", "target_lang": "..." }`.
+`{ "translation": "...", "provider": "...", "target_lang": "...", "reasoning": "..." }`,
+where `reasoning` is the effort actually sent (`""` when the request carries none).
+
+### Model picker
+
+The `model` credential is a static curated list plus **Custom…**: Dify
+credentials cannot fetch a live catalogue, so the list is fixed. Values are
+`openai_compatible/<model id>`; the prefix is the engine, the rest is the model
+id. Anything not on the list is reachable by picking Custom… (or typing a bare
+id), and the base URL stays editable for proxies and self-hosted servers.
 
 ## Parity with the DualTran browser extension (plan 64 D2-A)
 
